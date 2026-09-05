@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Datasets
+data/*
+!data/.gitkeep
+
+# Model artifacts
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.engine
+models/*.plan
+
+# Training artifacts
+checkpoints/
+runs/
+wandb/
+
+# Benchmark output
+benchmarks/results/
+
+# Environment variables
+.env
