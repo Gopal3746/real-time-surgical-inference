@@ -6,11 +6,16 @@ from torch.utils.data import DataLoader
 
 
 @dataclass(frozen=True)
+class CheckpointMetadata:
+    epoch: int
+    validation_loss: float
+    validation_accuracy: float
+
+@dataclass(frozen=True)
 class EpochMetrics:
     loss: float
     accuracy: float
     samples: int
-
 
 def train_one_epoch(
     model: torch.nn.Module,
@@ -167,4 +172,48 @@ def save_checkpoint(
             ),
         },
         checkpoint_path,
+    )
+
+def load_checkpoint(
+    checkpoint_path: Path,
+    model: torch.nn.Module,
+) -> CheckpointMetadata:
+    if not checkpoint_path.is_file():
+        raise FileNotFoundError(
+            f"Checkpoint does not exist: {checkpoint_path}"
+        )
+
+    checkpoint = torch.load(
+        checkpoint_path,
+        map_location="cpu",
+        weights_only=True,
+    )
+
+    required_keys = {
+        "epoch",
+        "model_state_dict",
+        "validation_loss",
+        "validation_accuracy",
+    }
+
+    missing_keys = required_keys - checkpoint.keys()
+
+    if missing_keys:
+        raise ValueError(
+            "Checkpoint is missing required keys: "
+            f"{sorted(missing_keys)}"
+        )
+
+    model.load_state_dict(
+        checkpoint["model_state_dict"]
+    )
+
+    return CheckpointMetadata(
+        epoch=int(checkpoint["epoch"]),
+        validation_loss=float(
+            checkpoint["validation_loss"]
+        ),
+        validation_accuracy=float(
+            checkpoint["validation_accuracy"]
+        ),
     )
