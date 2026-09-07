@@ -155,3 +155,82 @@ def write_manifest(
             count += 1
 
     return count
+
+def read_manifest(
+    manifest_path: Path,
+) -> list[ManifestRecord]:
+    if not manifest_path.is_file():
+        raise FileNotFoundError(
+            f"Manifest file does not exist: {manifest_path}"
+        )
+
+    required_fields = {
+        "video_id",
+        "video_number",
+        "split",
+        "frame",
+        "timestamp_seconds",
+        "phase",
+        "phase_index",
+        "video_path",
+    }
+
+    records: list[ManifestRecord] = []
+
+    with manifest_path.open(
+        "r",
+        encoding="utf-8",
+        newline="",
+    ) as file:
+        reader = csv.DictReader(file)
+
+        fieldnames = set(reader.fieldnames or [])
+
+        missing_fields = required_fields - fieldnames
+
+        if missing_fields:
+            raise ValueError(
+                "Manifest is missing required columns: "
+                f"{sorted(missing_fields)}"
+            )
+
+        for line_number, row in enumerate(
+            reader,
+            start=2,
+        ):
+            try:
+                video_number = int(row["video_number"])
+                frame = int(row["frame"])
+                timestamp_seconds = float(
+                    row["timestamp_seconds"]
+                )
+                phase_index = int(row["phase_index"])
+            except (TypeError, ValueError) as error:
+                raise ValueError(
+                    f"Invalid manifest row at line {line_number}"
+                ) from error
+
+            split = row["split"]
+
+            expected_split = get_split(video_number)
+
+            if split != expected_split:
+                raise ValueError(
+                    f"Invalid split at line {line_number}: "
+                    f"expected {expected_split}, got {split}"
+                )
+
+            records.append(
+                ManifestRecord(
+                    video_id=row["video_id"],
+                    video_number=video_number,
+                    split=split,
+                    frame=frame,
+                    timestamp_seconds=timestamp_seconds,
+                    phase=row["phase"],
+                    phase_index=phase_index,
+                    video_path=row["video_path"],
+                )
+            )
+
+    return records

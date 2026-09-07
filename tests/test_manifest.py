@@ -8,6 +8,7 @@ from surgphase.manifest import (
     get_split,
     iter_manifest_records,
     parse_video_number,
+    read_manifest,
     write_manifest,
 )
 
@@ -116,3 +117,30 @@ def test_write_manifest(
     assert rows[0]["video_id"] == "video01"
     assert rows[0]["split"] == "train"
     assert rows[0]["phase"] == "Preparation"
+
+def test_read_manifest(
+    tmp_path: Path,
+) -> None:
+    manifest_path = tmp_path / "manifest.csv"
+
+    records = [
+        ManifestRecord(
+            video_id="video01",
+            video_number=1,
+            split="train",
+            frame=25,
+            timestamp_seconds=1.0,
+            phase="Preparation",
+            phase_index=0,
+            video_path="/tmp/video01.mp4",
+        )
+    ]
+
+    write_manifest(
+        records=records,
+        output_path=manifest_path,
+    )
+
+    loaded = read_manifest(manifest_path)
+
+    assert loaded == records
