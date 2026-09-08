@@ -34,3 +34,6 @@ benchmarks/results/
 
 # Environment variables
 .env
+
+# Triton generated model repository
+deployment/model_repository/**/model.plan
