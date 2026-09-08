@@ -26,6 +26,12 @@ dev = [
     "ruff>=0.12",
 ]
 
+onnx = [
+    "onnx>=1.18",
+    "onnxscript>=0.3",
+    "onnxruntime>=1.22",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
