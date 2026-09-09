@@ -26,6 +26,10 @@ dev = [
     "ruff>=0.12",
 ]
 
+triton = [
+    "tritonclient[http]>=2.72,<3",
+]
+
 onnx = [
     "onnx>=1.18",
     "onnxscript>=0.3",
